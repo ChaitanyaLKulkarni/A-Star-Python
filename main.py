@@ -169,7 +169,7 @@ def GetGHFrom(curr,neighbour):
     HCost = 0
     if end.xpos == neighbour.xpos:
         HCost = 1 * abs(end.xpos - neighbour.xpos)
-    if end.ypos == neighbour.ypos:
+    elif end.ypos == neighbour.ypos:
         HCost = 1 * abs(end.ypos - neighbour.ypos)
     else:
         minA = min(abs(end.xpos - neighbour.xpos) ,  abs(end.ypos - neighbour.ypos))
