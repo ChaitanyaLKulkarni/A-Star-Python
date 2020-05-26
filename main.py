@@ -198,11 +198,9 @@ def main():
             end.Show((255,0,0),0)
             start.Show((0,0,0),3)
             end.Show((0,0,0),3)
-            ag = True
             while True:
                 for event in pygame.event.get():
-                    if event.type == pygame.KEYDOWN or pygame.QUIT:
-                        ag = False
+                    if event.type == pygame.KEYDOWN:
                         pygame.quit()   
                         sys.exit(0)
                         break
