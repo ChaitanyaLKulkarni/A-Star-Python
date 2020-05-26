@@ -34,21 +34,21 @@ class Node:
 
         if x < cols - 1 and not grid[x + 1][y].obstacle: #right
             self.neighbours.append(grid[x + 1][y])
-        if x > 0 and not grid[x - 1][y].obstacle: #left
+        if x > 0 and  not grid[x - 1][y].obstacle: #left
             self.neighbours.append(grid[x-1][y])
         if y < rows - 1 and not grid[x][y + 1].obstacle: #Top
             self.neighbours.append(grid[x][y+1])
         if y > 0 and not grid[x][y-1].obstacle: #bottom
             self.neighbours.append(grid[x][y-1])
-        if (x > 0 and y > 0) and not grid[x-1][y-1].obstacle: #bottom left
+        """if (x > 0 and y > 0) and grid[x-1][y-1].obstacle == False: #bottom left
             self.neighbours.append(grid[x-1][y-1])
-        if (x > 0 and y < rows - 1) and not grid[x-1][y+1].obstacle: #top left
+        if (x > 0 and y < rows - 1) and grid[x-1][y+1].obstacle == False: #top left
             self.neighbours.append(grid[x-1][y+1])
-        if (x < cols -1 and y > 0) and not grid[x-1][y-1].obstacle: #bottom right
+        if (x < cols -1 and y > 0) and grid[x-1][y-1].obstacle == False: #bottom right
             self.neighbours.append(grid[x+1][y-1])
-        if (x < cols - 1 and y < rows - 1) and not grid[x-1][y+1].obstacle: #top right
+        if (x < cols - 1 and y < rows - 1) and grid[x-1][y+1].obstacle == False: #top right
             self.neighbours.append(grid[x+1][y+1])
-
+        """
 
 
 cols = 50
@@ -57,7 +57,7 @@ rows = 50
 openSet = []
 closedSet = []
 pink = (255, 125, 125)
-red = (255, 0, 0)
+red = (150, 50, 50)
 green = (0, 255, 0)
 blue = (0, 0, 255)
 grey = (220, 220, 220)
@@ -156,7 +156,7 @@ while loop:
 for i in range(cols):
     for j in range(rows):
         grid[i][j].addNeighbours(grid)
-
+start.parent = start
 openSet.append(start)
 
 def GetGHFrom(curr,neighbour):
@@ -187,20 +187,25 @@ def main():
             if openSet[i].fCost < openSet[lowesetIndex].fCost:
                 lowesetIndex = i
         current = openSet[lowesetIndex]
-        current.Show(blue,0)
+        if start!=current or end!=current:
+            current.Show(blue,0)
         if current == end:
-            print("Donee")
-            while current.parent != None:
+            #print("Donee")
+            while current.parent != current:
                 current.Show(blue,0)
                 current = current.parent
-            start.Show(pink,1)
-            end.Show(pink,1)
+            start.Show((255,0,0),0)
+            end.Show((255,0,0),0)
+            start.Show((0,0,0),3)
+            end.Show((0,0,0),3)
+            ag = True
             while True:
-                ev = pygame.event.get()
-                for event in ev:
-                    if event.type == pygame.KEYDOWN:
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN or pygame.QUIT:
+                        ag = False
+                        pygame.quit()   
+                        sys.exit(0)
                         break
-            pygame.quit()
         else:
             openSet.pop(lowesetIndex)
             closedSet.append(current)
@@ -209,16 +214,28 @@ def main():
             for neighbour in neighbours:
                 if neighbour not in closedSet:
                     newG,newH = GetGHFrom(current,neighbour)
+                    if neighbour not in openSet:
+                            openSet.append(neighbour)
+                            neighbour.gCost = newG + 10
                     if neighbour.gCost > newG:
                         neighbour.gCost = newG
                         neighbour.hCost = newH
                         neighbour.parent = current
-                    neighbour.fCost = neighbour.gCost + neighbour.hCost
-                    if neighbour not in openSet:
-                        openSet.append(neighbour)
-                        neighbour.Show(green,0)
-            current.Show(red,0)
-
+                        neighbour.fCost = neighbour.gCost + neighbour.hCost
+                    neighbour.Show(green,0)
+            if start!=current:
+                current.Show(red,0)
+    else:
+        print("No Solution Found")
+        ag = True
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN or pygame.QUIT:
+                    ag = False
+                    pygame.quit()   
+                    sys.exit(0)
+                    break
+        
 while True:
     if pygame.event.poll().type == pygame.QUIT:
         pygame.quit()
