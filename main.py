@@ -2,9 +2,6 @@ try:
     import pygame
     import sys
     import math
-    from tkinter import *
-    from tkinter import ttk
-    from tkinter import messagebox
     import os
 except:
     import install_req  # install packages
@@ -22,7 +19,6 @@ class Node:
         self.neighbours = []
         self.parent = None
         self.obstacle = False
-        self.closed = False
     
     def Show(self, color, st):
         pygame.draw.rect(screen, color, (self.xpos * w, self.ypos * h, w, h), st)
@@ -50,11 +46,12 @@ class Node:
             self.neighbours.append(grid[x+1][y+1])
         
 
-cols = 40
-rows = 40
+cols = 20
+rows = 20
 grid = [0 for i in range(cols)]
 openSet = []
 closedSet = []
+path = []
 pink = (255, 125, 125)
 red = (150, 50, 50)
 green = (0, 255, 0)
@@ -94,13 +91,17 @@ for i in range(0,rows):
     grid[i][rows-1].Show(grey, 0)
     grid[i][rows-1].obstacle = True
 
-def SetTarget(pos):
-    global start,end
+def GetNodeFromPos(pos):
     x = pos[0]
     y = pos[1]
     g1 = x // (800 // cols)
     g2 = y // (800 // rows)
-    node = grid[g1][g2]
+    
+    return grid[g1][g2]
+
+def SetTarget(pos):
+    global start,end
+    node = GetNodeFromPos(pos)
     if node == start:
         node.Show(grey, 0)
         node.Show((255,255,255), 1)
@@ -115,12 +116,7 @@ def SetTarget(pos):
 
 def SetObstacle(pos):
     global lastDoing
-    x = pos[0]
-    y = pos[1]
-    g1 = x // (800 // cols)
-    g2 = y // (800 // rows)
-    
-    node = grid[g1][g2]
+    node = GetNodeFromPos(pos)
     if node != start and node != end:
         if lastDoing == -1:
             lastDoing = node.obstacle
@@ -178,34 +174,28 @@ def GetGHFrom(curr,neighbour):
     
     return Gcost,HCost
 
-def main():
-    if len(openSet) > 0:
+def AStar(steps):
+    while len(openSet) > 0:
         #TODO: Use heap to get loweset more efficiently
         lowesetIndex = 0
-        for i in range(1,len(openSet)):
+        for i in range(len(openSet)):
             if openSet[i].fCost < openSet[lowesetIndex].fCost:
                 lowesetIndex = i
         current = openSet[lowesetIndex]
-        if start!=current or end!=current:
-            current.Show(blue,0)
         if current == end:
             #print("Donee")
             while current.parent != current:
+                path.append(current)
                 current.Show(blue,0)
                 current = current.parent
             start.Show((255,0,0),0)
             end.Show((255,0,0),0)
             start.Show((0,0,0),3)
             end.Show((0,0,0),3)
-            while True:
-                for event in pygame.event.get():
-                    if event.type == pygame.KEYDOWN:
-                        pygame.quit()   
-                        sys.exit(0)
-                        break
+            return False
         else:
             openSet.pop(lowesetIndex)
-            closedSet.append(current)
+            closedSet.append(current)   
 
             neighbours = current.neighbours
             for neighbour in neighbours:
@@ -219,23 +209,93 @@ def main():
                         neighbour.hCost = newH
                         neighbour.parent = current
                         neighbour.fCost = neighbour.gCost + neighbour.hCost
-                    neighbour.Show(green,0)
-            if start!=current:
+                    if steps: neighbour.Show(green,0)
+            if start!=current and steps:
                 current.Show(red,0)
-    else:
+        if steps: break
+    if len(openSet) == 0:
         print("No Solution Found")
-        ag = True
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN or pygame.QUIT:
-                    ag = False
-                    pygame.quit()   
-                    sys.exit(0)
-                    break
+        return False
+    return True
         
-while True:
+while AStar(steps = True):
     if pygame.event.poll().type == pygame.QUIT:
         pygame.quit()
         sys.exit(0)
     pygame.display.update()
-    main()
+
+def Clear():
+    global openSet,closedSet,path
+    for o in openSet:
+        o.Show(grey,0)
+        o.Show((255,255,255), 1)
+        o.gCost = 0
+        o.hCost = 0
+        o.fCost = 0
+    for c in closedSet:
+        c.gCost = 0
+        c.hCost = 0
+        c.fCost = 0
+        c.parent = None
+        if c in path:
+            continue
+        c.Show(grey,0)
+        c.Show((255,255,255), 1)
+    openSet=[]
+    closedSet=[]
+    path=[]
+    start.gCost = 0
+    start.hCost = 0
+    start.fCost = 0
+    start.Show(pink,0)
+    end.Show(pink,0)
+
+def MoveTargets(selected,moveTo):
+    global start,end
+    if moveTo.obstacle or moveTo == selected:
+        return False
+    if selected == start:
+        if moveTo == end:
+            return False
+        
+        selected.Show(grey,0)
+        selected.Show((255,255,255), 1)
+        start = moveTo
+
+    elif selected == end:
+        if moveTo == start:
+            return False
+
+        selected.Show(grey,0)
+        selected.Show((255,255,255), 1)
+        end = moveTo
+    return True
+
+selected = None
+prevStart = start
+prevEnd = end
+Clear()
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT: #exiting game
+            pygame.quit()
+            sys.exit(1)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            selected = GetNodeFromPos(pygame.mouse.get_pos())
+            if selected != start and selected != end:
+                selected = None
+        if pygame.mouse.get_pressed()[0]:
+                if selected != None: 
+                    moveTo = GetNodeFromPos(pygame.mouse.get_pos())
+                    if MoveTargets(selected,moveTo):
+                        selected = moveTo
+        if event.type == pygame.MOUSEBUTTONUP:
+            selected = None
+    if prevStart != start or prevEnd != end:
+        path = []
+        Clear()
+        prevStart = start
+        prevEnd = end
+        start.parent = start
+        openSet.append(start)
+        AStar(steps=False)
