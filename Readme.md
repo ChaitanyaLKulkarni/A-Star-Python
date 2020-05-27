@@ -17,6 +17,9 @@ A* Algorithm:
     If There are more than 1 with loweset F cost:
         check closeset h cost
 
+
+![](Images/Demo.gif)
+
 Algo:
 
     OpenList //for storing nodes to be evaluated

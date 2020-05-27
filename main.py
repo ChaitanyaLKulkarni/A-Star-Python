@@ -225,7 +225,7 @@ while AStar(steps = True):
         sys.exit(0)
     pygame.display.update()
 
-def Clear():
+def Clear(cPath = False):
     global openSet,closedSet,path
     for o in openSet.items:
         o.Show(grey,0)
@@ -238,13 +238,17 @@ def Clear():
         c.hCost = 0
         c.fCost = 0
         c.parent = None
-        if c in path and False:
+        if c in path and not cPath:
             continue
         c.Show(grey,0)
         c.Show((255,255,255), 1)
+    if cPath:
+        for p in path:
+            p.Show(grey,0)
+            p.Show((255,255,255), 1)
+        path = []
     openSet.clear()
     closedSet=[]
-    path=[]
     start.gCost = 0
     start.hCost = 0
     start.fCost = 0
@@ -295,8 +299,7 @@ while True:
         if event.type == pygame.MOUSEBUTTONUP:
             selected = None
     if prevStart != start or prevEnd != end and selected == None:
-        path = []
-        Clear()
+        Clear(True)
         prevStart = start
         prevEnd = end
         start.parent = start
