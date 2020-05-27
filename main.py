@@ -6,6 +6,8 @@ try:
 except:
     import install_req  # install packages
 
+from Heap import Heap
+
 pygame.init()
 screen = pygame.display.set_mode((800, 800))
 
@@ -19,6 +21,7 @@ class Node:
         self.neighbours = []
         self.parent = None
         self.obstacle = False
+        self.heapIndex = -1
     
     def Show(self, color, st):
         pygame.draw.rect(screen, color, (self.xpos * w, self.ypos * h, w, h), st)
@@ -45,11 +48,13 @@ class Node:
         if (x < cols - 1 and y < rows - 1) and not grid[x+1][y+1].obstacle: #top right
             self.neighbours.append(grid[x+1][y+1])
         
+    def __lt__(self,other):
+        return self.fCost < other.fCost
 
-cols = 20
-rows = 20
+cols = 50
+rows = 50
 grid = [0 for i in range(cols)]
-openSet = []
+openSet = Heap()
 closedSet = []
 path = []
 pink = (255, 125, 125)
@@ -152,7 +157,7 @@ for i in range(cols):
     for j in range(rows):
         grid[i][j].addNeighbours(grid)
 start.parent = start
-openSet.append(start)
+openSet.push(start)
 
 def GetGHFrom(curr,neighbour):
     Gcost = 0
@@ -175,13 +180,9 @@ def GetGHFrom(curr,neighbour):
     return Gcost,HCost
 
 def AStar(steps):
-    while len(openSet) > 0:
+    while openSet.count() > 0:
         #TODO: Use heap to get loweset more efficiently
-        lowesetIndex = 0
-        for i in range(len(openSet)):
-            if openSet[i].fCost < openSet[lowesetIndex].fCost:
-                lowesetIndex = i
-        current = openSet[lowesetIndex]
+        current = openSet.pop()
         if current == end:
             #print("Donee")
             while current.parent != current:
@@ -194,26 +195,26 @@ def AStar(steps):
             end.Show((0,0,0),3)
             return False
         else:
-            openSet.pop(lowesetIndex)
             closedSet.append(current)   
 
             neighbours = current.neighbours
             for neighbour in neighbours:
                 if neighbour not in closedSet:
                     newG,newH = GetGHFrom(current,neighbour)
-                    if neighbour not in openSet:
-                            openSet.append(neighbour)
-                            neighbour.gCost = newG + 10
-                    if neighbour.gCost > newG:
+                    if neighbour not in openSet.items or neighbour.gCost > newG:
                         neighbour.gCost = newG
                         neighbour.hCost = newH
                         neighbour.parent = current
                         neighbour.fCost = neighbour.gCost + neighbour.hCost
+                        if neighbour not in openSet.items:
+                            openSet.push(neighbour)
+                        else:
+                            openSet.updateItem(neighbour)
                     if steps: neighbour.Show(green,0)
             if start!=current and steps:
                 current.Show(red,0)
         if steps: break
-    if len(openSet) == 0:
+    if openSet.count() == 0:
         print("No Solution Found")
         return False
     return True
@@ -226,7 +227,7 @@ while AStar(steps = True):
 
 def Clear():
     global openSet,closedSet,path
-    for o in openSet:
+    for o in openSet.items:
         o.Show(grey,0)
         o.Show((255,255,255), 1)
         o.gCost = 0
@@ -237,11 +238,11 @@ def Clear():
         c.hCost = 0
         c.fCost = 0
         c.parent = None
-        if c in path:
+        if c in path and False:
             continue
         c.Show(grey,0)
         c.Show((255,255,255), 1)
-    openSet=[]
+    openSet.clear()
     closedSet=[]
     path=[]
     start.gCost = 0
@@ -269,6 +270,8 @@ def MoveTargets(selected,moveTo):
         selected.Show(grey,0)
         selected.Show((255,255,255), 1)
         end = moveTo
+    start.Show(pink,0)
+    end.Show(pink,0)
     return True
 
 selected = None
@@ -291,11 +294,11 @@ while True:
                         selected = moveTo
         if event.type == pygame.MOUSEBUTTONUP:
             selected = None
-    if prevStart != start or prevEnd != end:
+    if prevStart != start or prevEnd != end and selected == None:
         path = []
         Clear()
         prevStart = start
         prevEnd = end
         start.parent = start
-        openSet.append(start)
+        openSet.push(start)
         AStar(steps=False)
