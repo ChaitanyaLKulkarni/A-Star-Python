@@ -40,20 +40,19 @@ class Node:
             self.neighbours.append(grid[x][y+1])
         if y > 0 and not grid[x][y-1].obstacle: #bottom
             self.neighbours.append(grid[x][y-1])
-        """if (x > 0 and y > 0) and grid[x-1][y-1].obstacle == False: #bottom left
+        if (x > 0 and y > 0) and not grid[x-1][y-1].obstacle: #bottom left
             self.neighbours.append(grid[x-1][y-1])
-        if (x > 0 and y < rows - 1) and grid[x-1][y+1].obstacle == False: #top left
+        if (x > 0 and y < rows - 1) and not grid[x-1][y+1].obstacle: #top left
             self.neighbours.append(grid[x-1][y+1])
-        if (x < cols -1 and y > 0) and grid[x-1][y-1].obstacle == False: #bottom right
+        if (x < cols -1 and y > 0) and not grid[x+1][y-1].obstacle: #bottom right
             self.neighbours.append(grid[x+1][y-1])
-        if (x < cols - 1 and y < rows - 1) and grid[x-1][y+1].obstacle == False: #top right
+        if (x < cols - 1 and y < rows - 1) and not grid[x+1][y+1].obstacle: #top right
             self.neighbours.append(grid[x+1][y+1])
-        """
+        
 
-
-cols = 50
+cols = 40
+rows = 40
 grid = [0 for i in range(cols)]
-rows = 50
 openSet = []
 closedSet = []
 pink = (255, 125, 125)
