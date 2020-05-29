@@ -9,9 +9,15 @@ import threading
 from Heap import Heap
 import Grid
 import AStar
+import Maze
+
+pos_x = 10
+pos_y = 0
+#os.environ['SDL_VIDEO_WINDOW_POS'] = '%i,%i' % (pos_x, pos_y)
+os.environ['SDL_VIDEO_CENTERED'] = '0'
 
 pygame.init()
-screen = pygame.display.set_mode((800, 800))
+screen = pygame.display.set_mode((700, 700))
 
 openSet = Heap()
 closedSet = []
@@ -22,7 +28,7 @@ pink = (255, 125, 125)
 screen.fill(grey)
 Grid.Init(pygame, screen)
 
-
+Maze.Create(pygame, screen, Grid.grid)
 loop = True
 while loop:
     for event in pygame.event.get():
@@ -34,12 +40,19 @@ while loop:
         if pygame.mouse.get_pressed()[0]:
             if Grid.start == -1 or Grid.end == -1:
                 Grid.SetTarget(pygame.mouse.get_pos())
-            else:
-                Grid.SetObstacle(pygame.mouse.get_pos())
+            # else:
+            #   Grid.SetObstacle(pygame.mouse.get_pos())
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 loop = False
                 break
+            """ if event.key in [pygame.K_w, pygame.K_d, pygame.K_s, pygame.K_a]:
+                node = Grid.GetNodeFromPos(pygame.mouse.get_pos())
+                node.walls[[
+                    pygame.K_w, pygame.K_d, pygame.K_s, pygame.K_a].index(event.key)] = True
+                node.Show(grey, 0)
+                node.Show((255, 255, 255), 0) """
+
 
 Grid.SetNeighbours()
 Grid.start.parent = Grid.start
@@ -56,8 +69,7 @@ while AStar.Solve(Grid.start, Grid.end, openSet, closedSet, path, steps=True):
 def Clear(cPath=False):
     global openSet, closedSet, path
     for o in openSet.items:
-        o.Show(grey, 0)
-        o.Show((255, 255, 255), 1)
+        o.Show((255, 255, 255), 0)
         o.gCost = 0
         o.hCost = 0
         o.fCost = 0
@@ -68,12 +80,10 @@ def Clear(cPath=False):
         c.parent = None
         if c in path and not cPath:
             continue
-        c.Show(grey, 0)
-        c.Show((255, 255, 255), 1)
+        c.Show((255, 255, 255), 0)
     if cPath:
         for p in path:
-            p.Show(grey, 0)
-            p.Show((255, 255, 255), 1)
+            p.Show((255, 255, 255), 0)
         path = []
     openSet.clear()
     closedSet = []

@@ -3,9 +3,9 @@ start = ""
 end = ""
 
 colors = {"Targets": (255, 125, 125),
-          "OpenSet": (0, 220, 0),
-          "ClosedSet": (150, 50, 50),
-          "Path": (0, 0, 255)}
+          "OpenSet": (109, 220, 160),
+          "ClosedSet": (224, 146, 49),
+          "Path": (109, 166, 160)}
 
 
 def GetGHFrom(curr, neighbour):
@@ -46,14 +46,17 @@ def Solve(_start, _end, openSet, closedSet, path, steps=False):
         current = openSet.pop()
         if current == end:
             # print("Donee")
+            prev = current
             while current.parent != current:
                 path.append(current)
                 current.Show(colors["Path"], 0)
+                prev.DrawTo(current)
+                prev = current
                 current = current.parent
             start.Show((255, 0, 0), 0)
             end.Show((255, 0, 0), 0)
-            start.Show((0, 0, 0), 3)
-            end.Show((0, 0, 0), 3)
+            # start.Show((0, 0, 0), 3)
+            # end.Show((0, 0, 0), 3)
             return False
         else:
             closedSet.append(current)
