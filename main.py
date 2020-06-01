@@ -5,7 +5,7 @@ try:
     import os
 except:
     import install_req  # install packages
-import threading
+import time
 from Heap import Heap
 import Grid
 import AStar
@@ -28,7 +28,8 @@ pink = (255, 125, 125)
 screen.fill(grey)
 Grid.Init(pygame, screen)
 
-Maze.Create(pygame, screen, Grid.grid)
+#Maze.RecurciveDivisionCreate(pygame, screen, Grid.grid)
+Maze.BacktrackingCreate(pygame, screen, Grid.grid)
 loop = True
 while loop:
     for event in pygame.event.get():
@@ -41,7 +42,7 @@ while loop:
             if Grid.start == -1 or Grid.end == -1:
                 Grid.SetTarget(pygame.mouse.get_pos())
             # else:
-            #   Grid.SetObstacle(pygame.mouse.get_pos())
+            #    Grid.SetObstacle(pygame.mouse.get_pos())
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
                 loop = False

@@ -90,8 +90,9 @@ def SetObstacle(pos):
             lastDoing = node.obstacle
         if lastDoing != node.obstacle:
             return
-        node.walls = [False, True, True, False]
-        # node.obstacle = not node.obstacle
+        node.obstacle = not node.obstacle
+        node.walls = [node.obstacle, node.obstacle,
+                      node.obstacle, node.obstacle]
         if node.obstacle:
             node.Show((0, 0, 0), 0)  # setting black
         else:
@@ -107,7 +108,7 @@ def SetNeighbours():
 
 def MoveTargets(selected, moveTo):
     global start, end, isChanged
-    if moveTo == selected:  # moveTo.obstacle or
+    if moveTo == selected or moveTo.obstacle:  # moveTo.obstacle or
         return None
     if selected == start:
         if moveTo == end:
@@ -139,6 +140,7 @@ class Node:
         self.fCost = 0
         self.neighbours = []
         self.parent = None
+        self.obstacle = False
         self.walls = [True, True, True, True]  # Top , Right , Bottom, Left
         self.heapIndex = -1
         self.visited = False
