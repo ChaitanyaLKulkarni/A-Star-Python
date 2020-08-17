@@ -35,7 +35,7 @@ Algo:
         if current is Target node :
             return and backtrack the path
 
-        foreach neighbor of target node
+        foreach neighbor of current node
             if neighbour is not traversable or in Closed
                 continue to next
 
